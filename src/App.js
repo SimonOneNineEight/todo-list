@@ -73,7 +73,11 @@ const TodoAdd = ({ handleAddTodo }) => {
     <TodoAddWrapper>
       <InputField
         type="text"
+<<<<<<< HEAD
         placeholder="新增 todo"
+=======
+        placeholder="�鰵憓� todo"
+>>>>>>> 9426e399acd6e3300c07336a8bb7873a5f4a57c3
         value={value}
         onChange={handleInputChange}
       />
@@ -83,7 +87,11 @@ const TodoAdd = ({ handleAddTodo }) => {
           setValue("");
         }}
       >
+<<<<<<< HEAD
         新增
+=======
+        �鰵憓�
+>>>>>>> 9426e399acd6e3300c07336a8bb7873a5f4a57c3
       </Button>
     </TodoAddWrapper>
   );
