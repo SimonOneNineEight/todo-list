@@ -9,6 +9,7 @@ import { addTodo } from "./redux/actions";
 const AppWrapper = styled.div`
   background: #f0f0f0;
   min-height: 700px;
+  height: 100vh;
 `;
 
 const TitleH1 = styled.div`
