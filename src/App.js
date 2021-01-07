@@ -1,10 +1,10 @@
-import "./App.css";
-import "normalize.css";
 import styled from "styled-components";
 import TodoItem from "./components/TodoItem";
-import React from "react";
-
-const { useState } = React;
+import TodoFilter from "./components/TodoFilter";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { statusSelector, todoSelector } from "./redux/selectors";
+import { addTodo } from "./redux/actions";
 
 const AppWrapper = styled.div`
   background: #f0f0f0;
@@ -25,7 +25,7 @@ const TodoBox = styled.div`
   border-radius: 10px;
   margin: 0 auto;
 `;
-const TodoAddWrapper = styled.div`
+const TodoAddWrapper = styled.form`
   display: flex;
   justify-content: center;
   margin: 10px 0;
@@ -41,18 +41,13 @@ const InputField = styled.input`
   }
 `;
 
-const TodoFilterWrapper = styled.div`
-  text-align: center;
-  margin: 8px auto;
-`;
-
 const DivideLine = styled.div`
   content: "";
   width: 95%;
   border-bottom: 1px solid #6c6c6c;
   margin: 5px auto;
 `;
-const Button = styled.span`
+const Button = styled.button`
   font-size: 14px;
   padding: 3px 5px;
   border: 1px solid #6c6c6c;
@@ -63,113 +58,50 @@ const Button = styled.span`
   }
 `;
 
-const TodoAdd = ({ handleAddTodo }) => {
+const TodoAdd = () => {
   const [value, setValue] = useState("");
+  const dispatch = useDispatch();
   const handleInputChange = (e) => {
     setValue(e.target.value);
   };
 
   return (
-    <TodoAddWrapper>
+    <TodoAddWrapper
+      onSubmit={(e) => {
+        e.preventDefault();
+        dispatch(addTodo(value));
+        setValue("");
+      }}
+    >
       <InputField
         type="text"
         placeholder="新增 todo"
         value={value}
         onChange={handleInputChange}
       />
-      <Button
-        onClick={() => {
-          handleAddTodo(value);
-          setValue("");
-        }}
-      >
-        新增
-      </Button>
+      <Button type="submit">新增</Button>
     </TodoAddWrapper>
   );
 };
 
-const TodoFilter = ({ filterList }) => {
-  return <TodoFilterWrapper>{filterList}</TodoFilterWrapper>;
-};
-
-let todoId = 1;
 function App() {
-  const [todos, setTodos] = useState([]);
-  const [status, setStatus] = useState("All");
-
-  const handleAddTodo = (value) => {
-    setTodos([
-      {
-        id: todoId,
-        content: value,
-        isDone: false,
-        isUpdate: false,
-      },
-      ...todos,
-    ]);
-    todoId++;
-  };
-
-  const handleTogglerIsDone = (id) => {
-    setTodos(
-      todos.map((todo) => {
-        if (todo.id !== id) return todo;
-        return { ...todo, isDone: !todo.isDone };
-      })
-    );
-  };
-
-  const handleTogglerUpdateTodo = (id) => {
-    setTodos(
-      todos.map((todo) => {
-        if (todo.id !== id) return todo;
-        return { ...todo, isUpdate: !todo.isUpdate };
-      })
-    );
-  };
-  const handleUpdateTodo = (id, value) => {
-    setTodos(
-      todos.map((todo) => {
-        if (todo.id !== id) return todo;
-        return { ...todo, content: value, isUpdate: false };
-      })
-    );
-  };
-
-  const handleDeleteTodo = (id) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
-  };
-
-  const FilterMap = {
-    All: () => true,
-    Done: (todo) => todo.isDone,
-    NotDone: (todo) => !todo.isDone,
-  };
-  const FilterName = Object.keys(FilterMap);
-  const filterList = FilterName.map((name) => (
-    <Button key={name} name={name} onClick={() => setStatus(name)}>
-      {name}
-    </Button>
-  ));
-
+  const status = useSelector(statusSelector);
+  const todos = useSelector(todoSelector);
   return (
     <AppWrapper>
       <TitleH1>Todo List</TitleH1>
       <TodoBox>
-        <TodoAdd handleAddTodo={handleAddTodo} />
+        <TodoAdd />
         <DivideLine />
-        {todos.filter(FilterMap[status]).map((todo) => (
-          <TodoItem
-            key={todo.id}
-            todo={todo}
-            handleTogglerIsDone={handleTogglerIsDone}
-            handleTogglerUpdateTodo={handleTogglerUpdateTodo}
-            handleUpdateTodo={handleUpdateTodo}
-            handleDeleteTodo={handleDeleteTodo}
-          />
-        ))}
-        <TodoFilter filterList={filterList} />
+        {todos
+          .filter((todo) => {
+            if (status === "All") return todo;
+            return status === "Done" ? todo.isDone : !todo.isDone;
+          })
+          .map((todo) => (
+            <TodoItem key={todo.id} todo={todo} />
+          ))}
+        <TodoFilter />
       </TodoBox>
     </AppWrapper>
   );
